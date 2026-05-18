@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'none'; object-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'none'; media-src 'none'; frame-ancestors 'none'; form-action 'self'"
+    />
+    <meta name="referrer" content="no-referrer" />
+    <title>Tomato Pomodoro</title>
+    <link rel="stylesheet" href="./styles.css?v=10" />
+  </head>
+  <body>
+    <main class="app-shell" aria-label="Tomato Pomodoro timer">
+      <div class="top-bar">
+        <button class="icon-button" id="resetButton" type="button" aria-label="Reset timer" title="Reset">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 3-6.7" />
+            <path d="M3 3v6h6" />
+          </svg>
+        </button>
+
+        <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings" title="Settings">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.53a1.7 1.7 0 0 0 1-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z" />
+          </svg>
+        </button>
+      </div>
+
+      <section class="timer-stage" aria-live="polite">
+        <p class="mode-label" id="modeLabel">Focus</p>
+        <time class="timer-display" id="timerDisplay" datetime="PT0S">00 : 00</time>
+      </section>
+
+      <section class="tomato-stage" aria-label="Progress">
+        <div class="progress-ring" id="progressRing">
+          <img src="./assets/tomatoto.png" alt="Tomato" class="tomato-image" />
+        </div>
+      </section>
+
+      <section class="control-stage">
+        <button class="play-button" id="playButton" type="button" aria-label="Start timer">
+          <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 5v14l11-7Z" />
+          </svg>
+          <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M7 5v14" />
+            <path d="M17 5v14" />
+          </svg>
+        </button>
+        <p class="action-label" id="actionLabel">Start</p>
+      </section>
+    </main>
+
+    <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
+      <form class="settings-panel" method="dialog" autocomplete="off">
+        <header class="panel-header">
+          <h2 id="settingsTitle">Settings</h2>
+          <button class="plain-icon-button" id="closeSettingsButton" value="cancel" type="submit" aria-label="Close settings" title="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+          <button class="mode-tab is-active" data-mode="focus" type="button">Focus</button>
+          <button class="mode-tab" data-mode="short" type="button">Short</button>
+          <button class="mode-tab" data-mode="long" type="button">Long</button>
+        </div>
+
+        <div class="settings-grid">
+          <label>
+            Focus
+            <input id="focusInput" type="number" min="1" max="120" step="1" inputmode="numeric" autocomplete="off" />
+          </label>
+          <label>
+            Short break
+            <input id="shortInput" type="number" min="1" max="60" step="1" inputmode="numeric" autocomplete="off" />
+          </label>
+          <label>
+            Long break
+            <input id="longInput" type="number" min="1" max="90" step="1" inputmode="numeric" autocomplete="off" />
+          </label>
+          <label>
+            Long after
+            <input id="cyclesInput" type="number" min="2" max="12" step="1" inputmode="numeric" autocomplete="off" />
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>Auto start</span>
+          <label class="switch">
+            <input id="autoStartInput" type="checkbox" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>Sound</span>
+          <label class="switch">
+            <input id="soundInput" type="checkbox" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="toggle-row">
+          <span>Vibration</span>
+          <label class="switch">
+            <input id="vibrationInput" type="checkbox" />
+            <span></span>
+          </label>
+        </div>
+
+        <div class="stats-row" aria-label="Completed focus sessions today">
+          <span>Today</span>
+          <strong id="todayCount">0</strong>
+        </div>
+
+        <footer class="panel-actions">
+          <button class="secondary-button" id="clearStatsButton" type="button">Clear</button>
+          <button class="primary-button" id="saveSettingsButton" value="default" type="submit">Save</button>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="./script.js?v=10"></script>
+  </body>
+</html>

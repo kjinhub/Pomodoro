@@ -1,0 +1,15 @@
+.gradle/
+build/
+app/build/
+app/src/main/assets/www/
+local.properties
+commandlinetools-*.zip
+
+# Play upload signing credentials. Keep these private.
+keystore/
+keystore.properties
+
+# Unused local image drafts.
+assets/ToMaTo.png
+assets/tomato-crop.png
+assets/tomato-cutout.png
