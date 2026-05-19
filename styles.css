@@ -383,6 +383,116 @@ button {
   background: var(--leaf);
 }
 
+.asset-store {
+  display: grid;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.asset-store-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 12px;
+}
+
+.asset-store h3 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.15;
+}
+
+.asset-store-header p {
+  min-height: 18px;
+  margin: 6px 0 0;
+  color: #6d6d6d;
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.restore-button {
+  min-width: 116px;
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: 0.78rem;
+  white-space: normal;
+}
+
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.asset-card {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+
+.asset-card.is-selected {
+  border-color: rgba(255, 38, 48, 0.45);
+  box-shadow: 0 0 0 3px rgba(255, 38, 48, 0.09);
+}
+
+.asset-preview {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f5f4f1;
+}
+
+.asset-preview img {
+  width: 86%;
+  height: 86%;
+  object-fit: contain;
+}
+
+.asset-card-body {
+  display: grid;
+  gap: 7px;
+}
+
+.asset-card h4 {
+  min-height: 34px;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-size: 0.84rem;
+  line-height: 1.18;
+}
+
+.asset-meta {
+  margin: 0;
+  color: #666;
+  font-size: 0.76rem;
+  font-weight: 760;
+  line-height: 1.2;
+}
+
+.asset-action {
+  width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  line-height: 1.1;
+  white-space: normal;
+}
+
+.asset-action:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
 .switch {
   position: relative;
   display: inline-flex;
@@ -465,6 +575,11 @@ button {
 
 @media (max-width: 380px) {
   .settings-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .asset-store-header,
+  .asset-grid {
     grid-template-columns: 1fr;
   }
 }

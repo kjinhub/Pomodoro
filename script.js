@@ -1,5 +1,21 @@
 const STORAGE_KEY = "tomato-pomodoro-settings";
 const STATS_KEY = "tomato-pomodoro-stats";
+const DEFAULT_TOMATO_SRC = "./assets/tomatoto.png";
+
+const PREMIUM_ASSETS = [
+  ["premium_asset_001", "Kiwi Slice", "./assets/store/previews/asset_001.webp"],
+  ["premium_asset_002", "Blue Gingham Button", "./assets/store/previews/asset_002.webp"],
+  ["premium_asset_003", "Pink Grapefruit", "./assets/store/previews/asset_003.webp"],
+  ["premium_asset_004", "Sprinkle Donut", "./assets/store/previews/asset_004.webp"],
+  ["premium_asset_005", "Lemon Glow", "./assets/store/previews/asset_005.webp"],
+  ["premium_asset_006", "Citrus Candy", "./assets/store/previews/asset_006.webp"],
+  ["premium_asset_007", "Lime Gloss", "./assets/store/previews/asset_007.webp"],
+  ["premium_asset_008", "Orange Slice", "./assets/store/previews/asset_008.webp"],
+  ["premium_asset_009", "Black Button", "./assets/store/previews/asset_009.webp"],
+  ["premium_asset_010", "Midnight Button", "./assets/store/previews/asset_010.webp"],
+  ["premium_asset_011", "Eight Ball", "./assets/store/previews/asset_011.webp"],
+  ["premium_asset_012", "Baseball", "./assets/store/previews/asset_012.webp"],
+];
 
 const DEFAULT_SETTINGS = {
   focus: 25,
@@ -28,6 +44,7 @@ const appShell = document.querySelector(".app-shell");
 const timerDisplay = document.getElementById("timerDisplay");
 const modeLabel = document.getElementById("modeLabel");
 const progressRing = document.getElementById("progressRing");
+const tomatoImage = document.getElementById("tomatoImage");
 const playButton = document.getElementById("playButton");
 const actionLabel = document.getElementById("actionLabel");
 const resetButton = document.getElementById("resetButton");
@@ -39,6 +56,9 @@ const saveSettingsButton = document.getElementById("saveSettingsButton");
 const clearStatsButton = document.getElementById("clearStatsButton");
 const todayCount = document.getElementById("todayCount");
 const modeTabs = Array.from(document.querySelectorAll(".mode-tab"));
+const assetGrid = document.getElementById("assetGrid");
+const assetStoreMessage = document.getElementById("assetStoreMessage");
+const restorePurchasesButton = document.getElementById("restorePurchasesButton");
 
 const inputs = {
   focus: document.getElementById("focusInput"),
@@ -59,6 +79,7 @@ let completedFocusSessions = 0;
 let timerId = null;
 let startedAt = 0;
 let completionAudioContext = null;
+let assetStoreState = createFallbackAssetStoreState();
 
 function loadSettings() {
   try {
@@ -123,6 +144,207 @@ function saveStats() {
     // Keep the in-memory count even when storage is unavailable.
   }
 }
+
+function createFallbackAssetStoreState(message = "Connect to the internet to purchase or restore assets.") {
+  return {
+    assets: PREMIUM_ASSETS.map(([productId, name, previewPath]) => ({
+      productId,
+      name,
+      previewPath,
+      price: "₩1,000",
+      owned: false,
+      locked: true,
+      selected: false,
+      canBuy: false,
+    })),
+    selectedProductId: "",
+    onlineForPurchases: false,
+    offlineLockedMessage: "Connect to the internet to purchase or restore assets.",
+    message,
+  };
+}
+
+function isNativeAssetStoreAvailable() {
+  return Boolean(window.TomatoAndroidAssetStore?.getStoreState);
+}
+
+function hydrateAssetStoreFromNative() {
+  if (!isNativeAssetStoreAvailable()) {
+    setDefaultTomatoImage();
+    renderAssetStore();
+    return;
+  }
+
+  try {
+    const nativeState = JSON.parse(window.TomatoAndroidAssetStore.getStoreState());
+    applyAssetStoreState(nativeState);
+  } catch {
+    assetStoreState = createFallbackAssetStoreState();
+  }
+
+  applySelectedAssetFromNative();
+  renderAssetStore();
+}
+
+function refreshAssetStoreFromNative() {
+  hydrateAssetStoreFromNative();
+  if (window.TomatoAndroidAssetStore?.refreshStore) {
+    window.TomatoAndroidAssetStore.refreshStore();
+  }
+}
+
+function applyAssetStoreState(nextState) {
+  if (!nextState || !Array.isArray(nextState.assets)) {
+    assetStoreState = createFallbackAssetStoreState();
+    return;
+  }
+
+  const known = new Map(PREMIUM_ASSETS.map(([productId, name, previewPath]) => [productId, { name, previewPath }]));
+  assetStoreState = {
+    assets: nextState.assets
+      .filter((asset) => known.has(asset.productId))
+      .map((asset) => {
+        const fallback = known.get(asset.productId);
+        return {
+          productId: asset.productId,
+          name: typeof asset.name === "string" ? asset.name : fallback.name,
+          previewPath: typeof asset.previewPath === "string" ? asset.previewPath : fallback.previewPath,
+          price: typeof asset.price === "string" && asset.price ? asset.price : "₩1,000",
+          owned: asset.owned === true,
+          locked: asset.owned !== true,
+          selected: asset.selected === true,
+          canBuy: asset.canBuy === true,
+        };
+      }),
+    selectedProductId: typeof nextState.selectedProductId === "string" ? nextState.selectedProductId : "",
+    onlineForPurchases: nextState.onlineForPurchases === true,
+    offlineLockedMessage: "Connect to the internet to purchase or restore assets.",
+    message: typeof nextState.message === "string" ? nextState.message : "",
+  };
+}
+
+function setDefaultTomatoImage() {
+  tomatoImage.src = tomatoImage.dataset.defaultSrc || DEFAULT_TOMATO_SRC;
+  tomatoImage.alt = "Tomato";
+}
+
+function applySelectedAssetFromNative() {
+  if (!window.TomatoAndroidAssetStore?.getSelectedAssetDataUrl) {
+    setDefaultTomatoImage();
+    return;
+  }
+
+  try {
+    const dataUrl = window.TomatoAndroidAssetStore.getSelectedAssetDataUrl();
+    if (typeof dataUrl === "string" && dataUrl.startsWith("data:image/")) {
+      tomatoImage.src = dataUrl;
+      const selectedAsset = assetStoreState.assets.find((asset) => asset.productId === assetStoreState.selectedProductId);
+      tomatoImage.alt = selectedAsset?.name || "Selected premium asset";
+      return;
+    }
+  } catch {
+    // Fall back to the free default image if the native entitlement cannot be read.
+  }
+
+  setDefaultTomatoImage();
+}
+
+function renderAssetStore() {
+  if (!assetGrid || !assetStoreMessage) {
+    return;
+  }
+
+  const lockedAssets = assetStoreState.assets.some((asset) => !asset.owned);
+  const fallbackMessage = !assetStoreState.onlineForPurchases && lockedAssets
+    ? assetStoreState.offlineLockedMessage
+    : "";
+  assetStoreMessage.textContent = assetStoreState.message || fallbackMessage;
+  assetGrid.replaceChildren(...assetStoreState.assets.map(createAssetCard));
+}
+
+function createAssetCard(asset) {
+  const card = document.createElement("article");
+  card.className = "asset-card";
+  card.classList.toggle("is-owned", asset.owned);
+  card.classList.toggle("is-selected", asset.selected);
+
+  const previewWrap = document.createElement("div");
+  previewWrap.className = "asset-preview";
+
+  const preview = document.createElement("img");
+  preview.src = asset.previewPath;
+  preview.alt = asset.name;
+  preview.loading = "lazy";
+  previewWrap.append(preview);
+
+  const body = document.createElement("div");
+  body.className = "asset-card-body";
+
+  const title = document.createElement("h4");
+  title.textContent = asset.name;
+
+  const meta = document.createElement("p");
+  meta.className = "asset-meta";
+  meta.textContent = `${asset.price} · ${asset.owned ? "Owned" : "Locked"}`;
+
+  const action = document.createElement("button");
+  action.type = "button";
+  action.className = asset.owned ? "secondary-button asset-action" : "primary-button asset-action";
+  action.dataset.productId = asset.productId;
+  action.dataset.action = asset.owned ? "use" : "buy";
+  action.textContent = asset.owned ? (asset.selected ? "Using" : "Use this asset") : "Buy for ₩1,000";
+  action.disabled = asset.owned ? asset.selected : !asset.canBuy;
+
+  body.append(title, meta, action);
+  card.append(previewWrap, body);
+  return card;
+}
+
+function buyAsset(productId) {
+  if (!window.TomatoAndroidAssetStore?.buy) {
+    assetStoreState.message = "Unable to purchase while offline.";
+    renderAssetStore();
+    return;
+  }
+
+  const asset = assetStoreState.assets.find((item) => item.productId === productId);
+  if (!asset?.canBuy) {
+    assetStoreState.message = "Unable to purchase while offline.";
+    renderAssetStore();
+    return;
+  }
+
+  window.TomatoAndroidAssetStore.buy(productId);
+}
+
+function useAsset(productId) {
+  if (!window.TomatoAndroidAssetStore?.selectAsset) {
+    return;
+  }
+
+  try {
+    const selected = window.TomatoAndroidAssetStore.selectAsset(productId);
+    if (selected) {
+      hydrateAssetStoreFromNative();
+    }
+  } catch {
+    setDefaultTomatoImage();
+  }
+}
+
+window.AssetStoreNative = {
+  onNativeState(serializedState) {
+    try {
+      applyAssetStoreState(JSON.parse(serializedState));
+      applySelectedAssetFromNative();
+      renderAssetStore();
+    } catch {
+      assetStoreState = createFallbackAssetStoreState();
+      setDefaultTomatoImage();
+      renderAssetStore();
+    }
+  },
+};
 
 function getDurationSeconds(nextMode = mode) {
   const duration = settings[nextMode] * 60;
@@ -375,6 +597,7 @@ resetButton.addEventListener("click", resetTimer);
 
 settingsButton.addEventListener("click", () => {
   syncSettingsForm();
+  refreshAssetStoreFromNative();
   if (typeof settingsDialog.showModal === "function") {
     settingsDialog.showModal();
   } else {
@@ -403,6 +626,29 @@ clearStatsButton.addEventListener("click", () => {
   updateUI();
 });
 
+restorePurchasesButton.addEventListener("click", () => {
+  if (window.TomatoAndroidAssetStore?.restorePurchases) {
+    window.TomatoAndroidAssetStore.restorePurchases();
+  } else {
+    assetStoreState.message = "Unable to purchase while offline.";
+    renderAssetStore();
+  }
+});
+
+assetGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("button[data-action][data-product-id]");
+  if (!button) {
+    return;
+  }
+
+  if (button.dataset.action === "buy") {
+    buyAsset(button.dataset.productId);
+    return;
+  }
+
+  useAsset(button.dataset.productId);
+});
+
 modeTabs.forEach((tab) => {
   tab.addEventListener("click", () => {
     pauseTimer();
@@ -424,4 +670,5 @@ window.addEventListener("keydown", (event) => {
 });
 
 syncSettingsForm();
+hydrateAssetStoreFromNative();
 updateUI();

@@ -2,6 +2,13 @@
 
 ## Play Store Upload File
 
+Current release version:
+
+```text
+versionCode 2
+versionName 1.1.0
+```
+
 Upload this Android App Bundle to Google Play Console:
 
 ```text
@@ -14,6 +21,25 @@ For local device testing, use:
 app/build/outputs/apk/release/app-release.apk
 ```
 
+## In-App Products
+
+Create these one-time, non-consumable in-app products in Play Console and price each at KRW 1,000:
+
+- `premium_asset_001`
+- `premium_asset_002`
+- `premium_asset_003`
+- `premium_asset_004`
+- `premium_asset_005`
+- `premium_asset_006`
+- `premium_asset_007`
+- `premium_asset_008`
+- `premium_asset_009`
+- `premium_asset_010`
+- `premium_asset_011`
+- `premium_asset_012`
+
+The Settings > Asset Store screen uses Google Play Billing only. Already-purchased assets remain usable offline from encrypted local entitlement cache.
+
 ## Offline Behavior
 
 The app does not request the Android `INTERNET` permission. The Pomodoro UI is packaged inside the app under `assets/www`, and `MainActivity` only loads:
@@ -25,6 +51,15 @@ file:///android_asset/www/index.html
 Any navigation outside `file:///android_asset/www/` is blocked by the WebView client.
 
 The app requests `android.permission.VIBRATE` so the session-complete alert can vibrate the device. Completion alerts are triggered through the local-only `TomatoAndroid` WebView bridge and play a native alarm tone when Sound is enabled.
+
+Purchasing, product detail queries, restore purchases, and entitlement synchronization require Google Play Billing connectivity.
+
+## Permissions
+
+- `android.permission.VIBRATE`: used only for Pomodoro completion vibration.
+- `com.android.vending.BILLING`: used only for premium replacement image asset purchases.
+
+The app does not request internet, location, contacts, camera, microphone, storage, or advertising ID permissions.
 
 ## Signing Credentials
 
