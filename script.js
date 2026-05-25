@@ -26,6 +26,8 @@ const DEFAULT_SETTINGS = {
   sound: true,
   vibration: true,
   language: "ko",
+  theme: "dark",
+  showTodaySummary: true,
 };
 
 const TRANSLATIONS = {
@@ -68,6 +70,10 @@ const TRANSLATIONS = {
     countUnit: " times",
     longAfterHelp: "A long break starts after {cycles} focus sessions.",
     language: "Language",
+    theme: "Theme",
+    themeHelp: "Choose dark or white mode.",
+    darkMode: "Dark mode",
+    lightMode: "White mode",
     autoStart: "Auto start",
     autoStartHelp: "The next focus or break session starts automatically.",
     sound: "Sound",
@@ -76,6 +82,7 @@ const TRANSLATIONS = {
     vibrationHelp: "Vibrate the device when a session ends.",
     today: "Today",
     todayStats: "Completed focus sessions today",
+    todayStatsHelp: "Show today's completed focus count on the timer screen.",
     tomatoAlt: "Tomato",
     selectedAssetAlt: "Selected premium asset",
     assetStore: "Asset Store",
@@ -85,6 +92,8 @@ const TRANSLATIONS = {
     clear: "Clear",
     resetDefaults: "Reset",
     save: "Save",
+    saving: "Saving...",
+    saveComplete: "Saved",
     cancel: "Cancel",
     settingsSaved: "Settings saved.",
     settingsReset: "Settings reset to defaults.",
@@ -145,6 +154,10 @@ const TRANSLATIONS = {
     countUnit: "회",
     longAfterHelp: "집중을 {cycles}번 완료하면 긴 휴식이 시작됩니다.",
     language: "언어",
+    theme: "테마",
+    themeHelp: "다크 모드 또는 화이트 모드를 선택하세요.",
+    darkMode: "다크 모드",
+    lightMode: "화이트 모드",
     autoStart: "자동 시작",
     autoStartHelp: "세션이 끝나면 다음 집중/휴식이 자동으로 시작됩니다.",
     sound: "소리",
@@ -153,6 +166,7 @@ const TRANSLATIONS = {
     vibrationHelp: "세션 종료 시 기기가 진동합니다.",
     today: "오늘 완료",
     todayStats: "오늘 완료한 집중 세션",
+    todayStatsHelp: "타이머 화면에 오늘 완료 횟수 문구를 표시합니다.",
     tomatoAlt: "토마토",
     selectedAssetAlt: "선택한 프리미엄 에셋",
     assetStore: "에셋 스토어",
@@ -162,6 +176,8 @@ const TRANSLATIONS = {
     clear: "초기화",
     resetDefaults: "초기화",
     save: "저장",
+    saving: "저장 중...",
+    saveComplete: "저장 완료",
     cancel: "취소",
     settingsSaved: "설정이 저장되었습니다.",
     settingsReset: "설정이 기본값으로 초기화되었습니다.",
@@ -207,6 +223,8 @@ const SETTING_LIMITS = {
   cycles: [1, 12],
 };
 
+const SUPPORTED_THEMES = new Set(["dark", "light"]);
+
 const appShell = document.querySelector(".app-shell");
 const timerDisplay = document.getElementById("timerDisplay");
 const modeLabel = document.getElementById("modeLabel");
@@ -221,14 +239,15 @@ const resetButton = document.getElementById("resetButton");
 const settingsButton = document.getElementById("settingsButton");
 const settingsDialog = document.getElementById("settingsDialog");
 const settingsForm = document.querySelector(".settings-panel");
+const themeChoice = document.querySelector(".theme-choice");
 const closeSettingsButton = document.getElementById("closeSettingsButton");
 const saveSettingsButton = document.getElementById("saveSettingsButton");
+const saveFeedbackToast = document.getElementById("saveFeedbackToast");
 const resetSettingsButton = document.getElementById("resetSettingsButton");
 const confirmResetDialog = document.getElementById("confirmResetDialog");
 const confirmResetButton = document.getElementById("confirmResetButton");
 const formMessage = document.getElementById("formMessage");
 const toast = document.getElementById("toast");
-const todayCount = document.getElementById("todayCount");
 const assetStore = document.getElementById("assetStore");
 const assetStoreToggle = document.getElementById("assetStoreToggle");
 const assetGrid = document.getElementById("assetGrid");
@@ -241,9 +260,12 @@ const inputs = {
   long: document.getElementById("longInput"),
   cycles: document.getElementById("cyclesInput"),
   language: document.getElementById("languageInput"),
+  darkTheme: document.getElementById("darkThemeInput"),
+  lightTheme: document.getElementById("lightThemeInput"),
   autoStart: document.getElementById("autoStartInput"),
   sound: document.getElementById("soundInput"),
   vibration: document.getElementById("vibrationInput"),
+  showTodaySummary: document.getElementById("showTodaySummaryInput"),
 };
 
 let settings = loadSettings();
@@ -259,6 +281,8 @@ let assetStoreState = createFallbackAssetStoreState();
 let isAssetStoreExpanded = false;
 let pendingNextMode = null;
 let toastTimerId = null;
+let saveFeedbackTimerId = null;
+let isSavingSettings = false;
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
@@ -281,7 +305,8 @@ function syncViewportMetrics() {
     ? Math.min(width * 0.22, height * 0.28, 250)
     : Math.min(width * 0.68, height * 0.32, 360);
   const timerTop = clamp(height * (isLandscape ? 0.15 : 0.15), isLandscape ? 70 : 96, isLandscape ? 124 : 170);
-  const tomatoTop = clamp(height * (isLandscape ? 0.3 : 0.36), isLandscape ? 160 : 286, isLandscape ? 250 : 370);
+  const tomatoBaseTop = clamp(height * (isLandscape ? 0.3 : 0.36), isLandscape ? 160 : 286, isLandscape ? 250 : 370);
+  const tomatoTop = Math.max(tomatoBaseTop, timerTop + (isLandscape ? 224 : 188));
   const bottomOffset = clamp(height * (isLandscape ? 0.045 : 0.048), isLandscape ? 28 : 24, isLandscape ? 42 : 52);
 
   appShell.style.setProperty("--app-width", `${width}px`);
@@ -317,6 +342,8 @@ function sanitizeSettings(value) {
     sound: typeof source.sound === "boolean" ? source.sound : DEFAULT_SETTINGS.sound,
     vibration: typeof source.vibration === "boolean" ? source.vibration : DEFAULT_SETTINGS.vibration,
     language: isSupportedLanguage(source.language) ? source.language : DEFAULT_SETTINGS.language,
+    theme: isSupportedTheme(source.theme) ? source.theme : DEFAULT_SETTINGS.theme,
+    showTodaySummary: typeof source.showTodaySummary === "boolean" ? source.showTodaySummary : DEFAULT_SETTINGS.showTodaySummary,
   };
 }
 
@@ -330,6 +357,10 @@ function saveSettings() {
 
 function isSupportedLanguage(language) {
   return typeof language === "string" && Object.prototype.hasOwnProperty.call(TRANSLATIONS, language);
+}
+
+function isSupportedTheme(theme) {
+  return typeof theme === "string" && SUPPORTED_THEMES.has(theme);
 }
 
 function t(key) {
@@ -358,10 +389,6 @@ function modeLabelFor(nextMode) {
 
 function activeModeLabelFor(nextMode) {
   return t(`${nextMode}Active`);
-}
-
-function formatCountWithUnit(count) {
-  return `${count}${t("countUnit")}`;
 }
 
 function getCurrentSetNumber() {
@@ -397,6 +424,13 @@ function applyLanguage() {
   setAssetStoreExpanded(isAssetStoreExpanded);
   renderAssetStore();
   updateUI();
+}
+
+function applyTheme() {
+  const theme = isSupportedTheme(settings.theme) ? settings.theme : DEFAULT_SETTINGS.theme;
+  document.documentElement.dataset.theme = theme;
+  themeChoice?.classList.toggle("is-dark", theme === "dark");
+  themeChoice?.classList.toggle("is-light", theme === "light");
 }
 
 function todayKey() {
@@ -705,6 +739,7 @@ function updateUI() {
     total: Math.max(1, settings.cycles).toString(),
   });
   todaySummary.textContent = formatText("todaySummary", { count: stats.count.toString() });
+  todaySummary.hidden = !settings.showTodaySummary;
   const normalizedElapsedRatio = Math.max(0, Math.min(1, elapsedRatio));
   progressRing.style.setProperty("--elapsed", normalizedElapsedRatio.toFixed(5));
   progressRing.classList.toggle("is-progressing", normalizedElapsedRatio > 0.0001);
@@ -718,7 +753,6 @@ function updateUI() {
       : isPausedSession
         ? t("resume")
         : t("startInitial");
-  todayCount.textContent = formatCountWithUnit(stats.count);
   document.title = `${formatTime(displaySeconds)} - Tomato Pomodoro`;
 }
 
@@ -911,10 +945,12 @@ function syncSettingsForm() {
   inputs.long.value = settings.long;
   inputs.cycles.value = settings.cycles;
   inputs.language.value = settings.language;
+  inputs.darkTheme.checked = settings.theme === "dark";
+  inputs.lightTheme.checked = settings.theme === "light";
   inputs.autoStart.checked = settings.autoStart;
   inputs.sound.checked = settings.sound;
   inputs.vibration.checked = settings.vibration;
-  todayCount.textContent = formatCountWithUnit(stats.count);
+  inputs.showTodaySummary.checked = settings.showTodaySummary;
   clearFormMessage();
 }
 
@@ -925,9 +961,11 @@ function getSettingsFormValues() {
     long: inputs.long.value,
     cycles: inputs.cycles.value,
     language: inputs.language.value,
+    theme: inputs.lightTheme.checked ? "light" : "dark",
     autoStart: inputs.autoStart.checked,
     sound: inputs.sound.checked,
     vibration: inputs.vibration.checked,
+    showTodaySummary: inputs.showTodaySummary.checked,
   };
 }
 
@@ -970,7 +1008,51 @@ function showToast(message) {
   }, 2200);
 }
 
+function checkIcon() {
+  const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  icon.setAttribute("viewBox", "0 0 24 24");
+  icon.setAttribute("aria-hidden", "true");
+
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "m5 12 4 4 10-10");
+  icon.append(path);
+  return icon;
+}
+
+function setSaveButtonState(state) {
+  saveSettingsButton.classList.toggle("is-saving", state === "saving");
+  saveSettingsButton.classList.toggle("is-complete", state === "complete");
+  saveSettingsButton.disabled = state === "saving" || state === "complete";
+
+  if (state === "saving") {
+    saveSettingsButton.textContent = t("saving");
+    return;
+  }
+
+  if (state === "complete") {
+    saveSettingsButton.replaceChildren(checkIcon(), document.createTextNode(t("saveComplete")));
+    return;
+  }
+
+  saveSettingsButton.textContent = t("save");
+}
+
+function showSaveFeedback(message) {
+  window.clearTimeout(saveFeedbackTimerId);
+  saveFeedbackToast.replaceChildren(checkIcon(), document.createTextNode(message));
+  saveFeedbackToast.classList.add("is-visible");
+  showToast(message);
+
+  saveFeedbackTimerId = window.setTimeout(() => {
+    saveFeedbackToast.classList.remove("is-visible");
+  }, 1500);
+}
+
 function applySettingsForm() {
+  if (isSavingSettings) {
+    return false;
+  }
+
   const validation = validateSettingsForm();
   if (validation) {
     showFormMessage(validation.message);
@@ -978,19 +1060,32 @@ function applySettingsForm() {
     return false;
   }
 
-  settings = sanitizeSettings(getSettingsFormValues());
+  isSavingSettings = true;
+  setSaveButtonState("saving");
 
-  saveSettings();
-  applyLanguage();
+  window.setTimeout(() => {
+    settings = sanitizeSettings(getSettingsFormValues());
 
-  if (!timerId) {
-    totalSeconds = getDurationSeconds(mode);
-    elapsedSeconds = 0;
-  }
+    saveSettings();
+    applyTheme();
+    applyLanguage();
 
-  updateUI();
-  showFormMessage(t("settingsSaved"), "success");
-  showToast(t("settingsSaved"));
+    if (!timerId) {
+      totalSeconds = getDurationSeconds(mode);
+      elapsedSeconds = 0;
+    }
+
+    updateUI();
+    showFormMessage(t("settingsSaved"), "success");
+    setSaveButtonState("complete");
+    showSaveFeedback(t("settingsSaved"));
+
+    window.setTimeout(() => {
+      isSavingSettings = false;
+      setSaveButtonState("idle");
+    }, 1200);
+  }, 280);
+
   return true;
 }
 
@@ -998,6 +1093,7 @@ function resetSettingsToDefaults() {
   settings = { ...DEFAULT_SETTINGS };
   saveSettings();
   syncSettingsForm();
+  applyTheme();
   applyLanguage();
 
   if (!timerId) {
@@ -1069,6 +1165,24 @@ inputs.language.addEventListener("change", () => {
   applyLanguage();
 });
 
+[inputs.darkTheme, inputs.lightTheme].forEach((input) => {
+  input.addEventListener("change", () => {
+    if (!input.checked) {
+      return;
+    }
+
+    settings = sanitizeSettings({ ...settings, theme: input.value });
+    saveSettings();
+    applyTheme();
+  });
+});
+
+inputs.showTodaySummary.addEventListener("change", () => {
+  settings = sanitizeSettings({ ...settings, showTodaySummary: inputs.showTodaySummary.checked });
+  saveSettings();
+  updateUI();
+});
+
 restorePurchasesButton.addEventListener("click", () => {
   if (window.TomatoAndroidAssetStore?.restorePurchases) {
     window.TomatoAndroidAssetStore.restorePurchases();
@@ -1123,6 +1237,7 @@ window.visualViewport?.addEventListener("resize", syncViewportMetrics);
 window.visualViewport?.addEventListener("scroll", syncViewportMetrics);
 
 syncViewportMetrics();
+applyTheme();
 syncSettingsForm();
 setAssetStoreExpanded(false);
 hydrateAssetStoreFromNative();

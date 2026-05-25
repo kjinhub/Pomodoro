@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --paper: #fbfbfa;
   --surface: #ffffff;
   --surface-muted: #f5f4f1;
@@ -15,6 +16,22 @@
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #141413;
+  --surface: #222220;
+  --surface-muted: #2c2b28;
+  --ink: #f4f1ec;
+  --muted: #b7b1a8;
+  --line: #3c3934;
+  --tomato-dark: #ff6970;
+  --leaf: #62c980;
+  --danger: #ff7b7b;
+  --overlay: rgba(0, 0, 0, 0.46);
+  --shadow: 0 20px 45px rgba(0, 0, 0, 0.38);
+  --soft-shadow: 0 12px 26px rgba(0, 0, 0, 0.34);
 }
 
 * {
@@ -39,11 +56,60 @@ body {
   background:
     radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.96), rgba(250, 250, 249, 0.74) 42%, rgba(246, 245, 242, 0.9) 100%),
     var(--paper);
+  transition:
+    color 260ms ease,
+    background 260ms ease;
+}
+
+body::before {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(42, 41, 38, 0.95), rgba(28, 27, 25, 0.9) 48%, rgba(20, 20, 19, 1) 100%);
+  opacity: 0;
+  content: "";
+  transition: opacity 260ms ease;
+}
+
+:root[data-theme="dark"] body::before {
+  opacity: 1;
+}
+
+:root[data-theme="dark"] .timer-display {
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.34),
+    0 9px 24px rgba(0, 0, 0, 0.28);
 }
 
 button,
 input {
   font: inherit;
+}
+
+.app-shell,
+.settings-panel,
+.confirm-panel,
+.icon-button,
+.plain-icon-button,
+.play-button,
+.unit-input,
+.select-row select,
+.theme-choice,
+.theme-option span,
+.stats-row strong,
+.asset-card,
+.asset-preview,
+.primary-button,
+.secondary-button {
+  transition:
+    color 240ms ease,
+    background 240ms ease,
+    border-color 240ms ease,
+    box-shadow 240ms ease,
+    opacity 180ms ease,
+    transform 180ms ease,
+    filter 180ms ease;
 }
 
 button {
@@ -182,27 +248,22 @@ button {
 
 .progress-ring {
   --elapsed: 0;
-  --ring-size: clamp(9px, 1.8vmin, 16px);
+  --ring-size: 0px;
   position: relative;
   display: grid;
   place-items: center;
   width: 100%;
   aspect-ratio: 1;
   border-radius: 50%;
-  padding: var(--ring-size);
-  background:
-    conic-gradient(from 0deg at 50% 50%, var(--tomato) calc(var(--elapsed) * 1turn), rgba(255, 38, 48, 0.14) 0),
-    var(--surface);
-  filter: drop-shadow(0 28px 24px rgba(249, 24, 28, 0.22));
+  padding: 0;
+  background: transparent;
+  filter: drop-shadow(0 24px 22px rgba(249, 24, 28, 0.2));
   overflow: hidden;
 }
 
 .progress-ring::before {
-  position: absolute;
-  inset: var(--ring-size);
-  border-radius: 50%;
-  background: var(--surface);
-  content: "";
+  display: none;
+  content: none;
 }
 
 .progress-ring::after {
@@ -263,19 +324,50 @@ button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 16px;
   width: auto;
-  min-width: min(78vw, 210px);
-  height: var(--play-size);
-  min-height: 56px;
-  padding: 0 clamp(24px, 5vmin, 36px);
+  min-width: min(82vw, 236px);
+  height: calc(var(--play-size) + 10px);
+  min-height: 66px;
+  padding: 0 clamp(30px, 6vmin, 44px);
   border-radius: 999px;
-  box-shadow: var(--shadow);
-  font-size: clamp(18px, 2.7vmin, 24px);
-  font-weight: 850;
+  color: #fff;
+  background:
+    linear-gradient(135deg, #ff6a4d 0%, #ff2630 45%, #d90f1b 100%);
+  box-shadow:
+    0 18px 38px rgba(255, 38, 48, 0.34),
+    0 0 34px rgba(255, 38, 48, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  font-size: clamp(19px, 2.8vmin, 25px);
+  font-weight: 900;
   transition:
-    transform 160ms ease,
+    background 160ms ease,
+    filter 160ms ease,
+    transform 140ms ease,
     box-shadow 160ms ease;
+}
+
+.play-button:hover {
+  transform: translateY(-3px) scale(1.015);
+  filter: saturate(1.08) brightness(1.04);
+  box-shadow:
+    0 22px 46px rgba(255, 38, 48, 0.42),
+    0 0 42px rgba(255, 38, 48, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.play-button:active {
+  transform: translateY(1px) scale(0.97);
+  filter: saturate(1.04) brightness(0.96);
+  box-shadow:
+    0 12px 24px rgba(255, 38, 48, 0.3),
+    0 0 24px rgba(255, 38, 48, 0.2),
+    inset 0 2px 8px rgba(120, 0, 0, 0.2);
+}
+
+.play-button:focus-visible {
+  outline: 4px solid rgba(255, 38, 48, 0.28);
+  outline-offset: 4px;
 }
 
 .play-button span {
@@ -284,12 +376,17 @@ button {
 
 .play-button svg {
   flex: 0 0 auto;
-  width: 1.25em;
-  height: 1.25em;
-  fill: var(--tomato);
-  stroke: var(--tomato);
-  stroke-width: 2.8;
+  width: 1.35em;
+  height: 1.35em;
+  padding: 0.26em;
+  border-radius: 50%;
+  color: #ff2630;
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: 2.7;
   stroke-linecap: round;
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.34);
 }
 
 .pause-icon {
@@ -405,7 +502,7 @@ button {
   display: grid;
   align-content: start;
   gap: 8px;
-  color: #4d4d4d;
+  color: var(--muted);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -477,6 +574,7 @@ button {
 
 .toggle-row,
 .select-row,
+.theme-row,
 .stats-row {
   min-height: 52px;
   padding: 0 4px;
@@ -502,6 +600,128 @@ button {
 .option-row > span {
   display: grid;
   gap: 4px;
+}
+
+.theme-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.theme-choice {
+  --theme-thumb-x: 0px;
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-muted);
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.theme-choice::before {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.72) 34%, var(--surface) 100%);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(255, 255, 255, 0.5);
+  content: "";
+  transform: translateX(var(--theme-thumb-x));
+  transition:
+    background 260ms ease,
+    box-shadow 260ms ease,
+    transform 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.theme-choice.is-light {
+  --theme-thumb-x: 50px;
+}
+
+.theme-choice.is-dark::before {
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.22), rgba(52, 51, 48, 0.96) 42%, var(--surface) 100%);
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.theme-choice.is-light::before {
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 1), rgba(255, 246, 213, 0.94) 44%, var(--surface) 100%);
+}
+
+.theme-option {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+}
+
+.theme-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.theme-option span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.55;
+  transform: scale(0.94);
+}
+
+.theme-option svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.theme-option input:checked + span {
+  color: var(--ink);
+  background: transparent;
+  box-shadow: none;
+  opacity: 1;
+  transform: scale(1);
+}
+
+.theme-option:first-child input:checked + span {
+  color: #f4f1ec;
+}
+
+.theme-option:last-child input:checked + span {
+  color: #f5a400;
+}
+
+.theme-option input:active + span,
+.theme-option:active span {
+  transform: scale(0.9);
+}
+
+.theme-option input:focus-visible + span {
+  outline: 3px solid rgba(255, 38, 48, 0.28);
+  outline-offset: 2px;
 }
 
 .stats-row strong {
@@ -692,12 +912,33 @@ button {
 
 .primary-button,
 .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   min-width: 104px;
   min-height: 46px;
   border: 0;
   border-radius: 999px;
   font-weight: 800;
   cursor: pointer;
+  transition:
+    background 160ms ease,
+    opacity 160ms ease,
+    transform 120ms ease,
+    box-shadow 160ms ease;
+}
+
+.primary-button:active,
+.secondary-button:active {
+  transform: scale(0.96);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  cursor: default;
+  opacity: 0.88;
+  transform: none;
 }
 
 .primary-button {
@@ -705,9 +946,75 @@ button {
   background: var(--tomato);
 }
 
+.primary-button:hover:not(:disabled) {
+  box-shadow: 0 10px 22px rgba(255, 38, 48, 0.22);
+}
+
+.primary-button.is-saving {
+  background: linear-gradient(135deg, #ff6550, #ff2630);
+}
+
+.primary-button.is-complete {
+  background: var(--leaf);
+  box-shadow: 0 10px 22px rgba(23, 134, 58, 0.22);
+}
+
+.primary-button svg {
+  width: 1.1em;
+  height: 1.1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .secondary-button {
   color: var(--ink);
   background: var(--surface-muted);
+}
+
+.save-feedback-toast {
+  position: fixed;
+  top: max(22px, calc(env(safe-area-inset-top) + 22px));
+  right: 50%;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  max-width: min(calc(100vw - 32px), 360px);
+  margin: 0;
+  padding: 9px 14px;
+  border-radius: 999px;
+  color: #fff;
+  background: rgba(23, 134, 58, 0.96);
+  box-shadow: 0 14px 28px rgba(23, 134, 58, 0.2);
+  font-size: 0.86rem;
+  font-weight: 850;
+  line-height: 1.2;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(50%, -12px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.save-feedback-toast.is-visible {
+  opacity: 1;
+  transform: translate(50%, 0);
+}
+
+.save-feedback-toast svg {
+  width: 1.1em;
+  height: 1.1em;
+  flex: 0 0 auto;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .confirm-panel {
@@ -739,20 +1046,22 @@ button {
 .toast {
   position: fixed;
   right: 50%;
-  bottom: max(22px, calc(env(safe-area-inset-bottom) + 22px));
+  top: max(22px, calc(env(safe-area-inset-top) + 22px));
   z-index: 20;
   max-width: min(calc(100vw - 32px), 360px);
   padding: 12px 16px;
   border-radius: 999px;
   color: #fff;
-  background: rgba(24, 24, 24, 0.92);
-  box-shadow: var(--soft-shadow);
-  font-size: 0.92rem;
+  background: rgba(23, 134, 58, 0.96);
+  box-shadow:
+    0 18px 38px rgba(23, 134, 58, 0.22),
+    var(--soft-shadow);
+  font-size: 0.95rem;
   font-weight: 800;
   line-height: 1.25;
   opacity: 0;
   pointer-events: none;
-  transform: translate(50%, 12px);
+  transform: translate(50%, -12px);
   transition:
     opacity 160ms ease,
     transform 160ms ease;
@@ -778,37 +1087,9 @@ button {
   }
 }
 
-@media (orientation: landscape) {
-  .timer-stage {
-    top: clamp(70px, 15dvh, 120px);
-  }
-
-  .tomato-stage {
-    top: clamp(160px, 30dvh, 250px);
-  }
-}
-
 @media (min-width: 700px) and (min-height: 700px) {
   .app-shell {
     --edge-gutter: 48px;
-  }
-
-  .timer-stage {
-    top: clamp(150px, 17dvh, 220px);
-  }
-
-  .tomato-stage {
-    top: clamp(300px, 33dvh, 390px);
-  }
-}
-
-@media (orientation: landscape) and (min-width: 700px) and (min-height: 700px) {
-  .timer-stage {
-    top: clamp(86px, 15dvh, 124px);
-  }
-
-  .tomato-stage {
-    top: clamp(190px, 30dvh, 250px);
   }
 }
 
@@ -819,34 +1100,5 @@ button {
 
   .asset-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --paper: #141413;
-    --surface: #222220;
-    --surface-muted: #2c2b28;
-    --ink: #f4f1ec;
-    --muted: #b7b1a8;
-    --line: #3c3934;
-    --tomato-dark: #ff6970;
-    --leaf: #62c980;
-    --danger: #ff7b7b;
-    --overlay: rgba(0, 0, 0, 0.46);
-    --shadow: 0 20px 45px rgba(0, 0, 0, 0.38);
-    --soft-shadow: 0 12px 26px rgba(0, 0, 0, 0.34);
-  }
-
-  body {
-    background:
-      radial-gradient(circle at 50% 45%, rgba(42, 41, 38, 0.95), rgba(28, 27, 25, 0.9) 48%, rgba(20, 20, 19, 1) 100%),
-      var(--paper);
-  }
-
-  .timer-display {
-    text-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.34),
-      0 9px 24px rgba(0, 0, 0, 0.28);
   }
 }

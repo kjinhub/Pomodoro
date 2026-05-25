@@ -9,7 +9,7 @@
     />
     <meta name="referrer" content="no-referrer" />
     <title>Tomato Pomodoro</title>
-    <link rel="stylesheet" href="./styles.css?v=22" />
+    <link rel="stylesheet" href="./styles.css?v=26" />
   </head>
   <body>
     <main class="app-shell" aria-label="Tomato Pomodoro timer" data-i18n-aria-label="appLabel">
@@ -115,6 +115,39 @@
           </select>
         </label>
 
+        <div class="theme-row option-row" role="radiogroup" aria-labelledby="themeTitle">
+          <span>
+            <strong id="themeTitle" data-i18n="theme">Theme</strong>
+            <small data-i18n="themeHelp">Choose dark or white mode.</small>
+          </span>
+          <div class="theme-choice">
+            <label class="theme-option" title="Dark mode" data-i18n-title="darkMode">
+              <input id="darkThemeInput" name="themeInput" type="radio" value="dark" data-i18n-aria-label="darkMode" />
+              <span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M21 14.6A8.5 8.5 0 0 1 9.4 3a7 7 0 1 0 11.6 11.6Z" />
+                </svg>
+              </span>
+            </label>
+            <label class="theme-option" title="White mode" data-i18n-title="lightMode">
+              <input id="lightThemeInput" name="themeInput" type="radio" value="light" data-i18n-aria-label="lightMode" />
+              <span>
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="4" />
+                  <path d="M12 2v2" />
+                  <path d="M12 20v2" />
+                  <path d="m4.93 4.93 1.41 1.41" />
+                  <path d="m17.66 17.66 1.41 1.41" />
+                  <path d="M2 12h2" />
+                  <path d="M20 12h2" />
+                  <path d="m6.34 17.66-1.41 1.41" />
+                  <path d="m19.07 4.93-1.41 1.41" />
+                </svg>
+              </span>
+            </label>
+          </div>
+        </div>
+
         <div class="toggle-row option-row">
           <span>
             <strong data-i18n="autoStart">Auto start</strong>
@@ -148,9 +181,15 @@
           </label>
         </div>
 
-        <div class="stats-row" aria-label="Completed focus sessions today" data-i18n-aria-label="todayStats">
-          <span data-i18n="todayStats">Completed focus sessions today</span>
-          <strong id="todayCount">0 times</strong>
+        <div class="toggle-row option-row" aria-label="Completed focus sessions today" data-i18n-aria-label="todayStats">
+          <span>
+            <strong data-i18n="todayStats">Completed focus sessions today</strong>
+            <small data-i18n="todayStatsHelp">Show today's completed focus count on the timer screen.</small>
+          </span>
+          <label class="switch">
+            <input id="showTodaySummaryInput" type="checkbox" />
+            <span></span>
+          </label>
         </div>
 
         <section class="asset-store is-collapsed" id="assetStore" aria-labelledby="assetStoreTitle">
@@ -183,6 +222,7 @@
           <button class="secondary-button" id="resetSettingsButton" type="button" data-i18n="resetDefaults">Reset</button>
           <button class="primary-button" id="saveSettingsButton" value="default" type="submit" data-i18n="save">Save</button>
         </footer>
+        <p class="save-feedback-toast" id="saveFeedbackToast" role="status" aria-live="polite"></p>
       </form>
     </dialog>
 
@@ -199,6 +239,6 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./script.js?v=19"></script>
+    <script src="./script.js?v=23"></script>
   </body>
 </html>
