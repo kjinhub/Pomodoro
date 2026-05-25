@@ -46,6 +46,9 @@ class MainActivity : Activity() {
         val settings = view.settings
         settings.javaScriptEnabled = true
         settings.domStorageEnabled = true
+        settings.useWideViewPort = false
+        settings.loadWithOverviewMode = false
+        settings.textZoom = 100
         settings.databaseEnabled = false
         settings.allowContentAccess = false
         settings.allowFileAccess = true

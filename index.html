@@ -9,19 +9,19 @@
     />
     <meta name="referrer" content="no-referrer" />
     <title>Tomato Pomodoro</title>
-    <link rel="stylesheet" href="./styles.css?v=12" />
+    <link rel="stylesheet" href="./styles.css?v=22" />
   </head>
   <body>
-    <main class="app-shell" aria-label="Tomato Pomodoro timer">
+    <main class="app-shell" aria-label="Tomato Pomodoro timer" data-i18n-aria-label="appLabel">
       <div class="top-bar">
-        <button class="icon-button" id="resetButton" type="button" aria-label="Reset timer" title="Reset">
+        <button class="icon-button" id="resetButton" type="button" aria-label="Reset timer" title="Reset" data-i18n-aria-label="resetTimer" data-i18n-title="reset">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M3 12a9 9 0 1 0 3-6.7" />
             <path d="M3 3v6h6" />
           </svg>
         </button>
 
-        <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings" title="Settings">
+        <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings" title="Settings" data-i18n-aria-label="openSettings" data-i18n-title="settings">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
             <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.53a1.7 1.7 0 0 0 1-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z" />
@@ -32,10 +32,13 @@
       <section class="timer-stage" aria-live="polite">
         <p class="mode-label" id="modeLabel">Focus</p>
         <time class="timer-display" id="timerDisplay" datetime="PT0S">00 : 00</time>
+        <p class="set-label" id="setLabel">1 / 4 sets</p>
+        <p class="today-summary" id="todaySummary">Today 0</p>
       </section>
 
-      <section class="tomato-stage" aria-label="Progress">
+      <section class="tomato-stage" aria-label="Progress" data-i18n-aria-label="progress">
         <div class="progress-ring" id="progressRing">
+          <canvas id="tomatoCanvas" class="tomato-canvas" aria-hidden="true"></canvas>
           <img id="tomatoImage" src="./assets/tomatoto.png" data-default-src="./assets/tomatoto.png" alt="Tomato" class="tomato-image" />
         </div>
       </section>
@@ -49,16 +52,16 @@
             <path d="M7 5v14" />
             <path d="M17 5v14" />
           </svg>
+          <span id="actionLabel">Start</span>
         </button>
-        <p class="action-label" id="actionLabel">Start</p>
       </section>
     </main>
 
     <dialog class="settings-dialog" id="settingsDialog" aria-labelledby="settingsTitle">
       <form class="settings-panel" method="dialog" autocomplete="off">
         <header class="panel-header">
-          <h2 id="settingsTitle">Settings</h2>
-          <button class="plain-icon-button" id="closeSettingsButton" value="cancel" type="submit" aria-label="Close settings" title="Close">
+          <h2 id="settingsTitle" data-i18n="settings">Settings</h2>
+          <button class="plain-icon-button" id="closeSettingsButton" value="cancel" type="submit" aria-label="Close settings" title="Close" data-i18n-aria-label="closeSettings" data-i18n-title="close">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M18 6 6 18" />
               <path d="m6 6 12 12" />
@@ -66,78 +69,136 @@
           </button>
         </header>
 
-        <div class="mode-tabs" role="tablist" aria-label="Timer mode">
-          <button class="mode-tab is-active" data-mode="focus" type="button">Focus</button>
-          <button class="mode-tab" data-mode="short" type="button">Short</button>
-          <button class="mode-tab" data-mode="long" type="button">Long</button>
-        </div>
+        <section class="settings-section" aria-labelledby="timeSettingsTitle">
+          <h3 id="timeSettingsTitle" data-i18n="timeSettings">Time settings</h3>
 
-        <div class="settings-grid">
-          <label>
-            Focus
-            <input id="focusInput" type="number" min="1" max="120" step="1" inputmode="numeric" autocomplete="off" />
-          </label>
-          <label>
-            Short break
-            <input id="shortInput" type="number" min="1" max="60" step="1" inputmode="numeric" autocomplete="off" />
-          </label>
-          <label>
-            Long break
-            <input id="longInput" type="number" min="1" max="90" step="1" inputmode="numeric" autocomplete="off" />
-          </label>
-          <label>
-            Long after
-            <input id="cyclesInput" type="number" min="2" max="12" step="1" inputmode="numeric" autocomplete="off" />
-          </label>
-        </div>
+          <div class="settings-grid">
+            <label>
+              <span data-i18n="focusDuration">Focus</span>
+              <span class="unit-input">
+                <input id="focusInput" type="number" min="1" max="120" step="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+                <span data-i18n="minutesUnit">min</span>
+              </span>
+            </label>
+            <label>
+              <span data-i18n="shortBreak">Short break</span>
+              <span class="unit-input">
+                <input id="shortInput" type="number" min="1" max="60" step="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+                <span data-i18n="minutesUnit">min</span>
+              </span>
+            </label>
+            <label>
+              <span data-i18n="longBreak">Long break</span>
+              <span class="unit-input">
+                <input id="longInput" type="number" min="1" max="90" step="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+                <span data-i18n="minutesUnit">min</span>
+              </span>
+            </label>
+            <label>
+              <span data-i18n="longAfter">Long after</span>
+              <span class="unit-input">
+                <input id="cyclesInput" type="number" min="1" max="12" step="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off" />
+                <span data-i18n="sessionsUnit">times</span>
+              </span>
+            </label>
+          </div>
+          <p class="settings-help" data-i18n="longAfterHelp">A long break starts after 4 focus sessions.</p>
+        </section>
 
-        <div class="toggle-row">
-          <span>Auto start</span>
+        <p class="form-message" id="formMessage" role="alert" aria-live="assertive"></p>
+
+        <label class="select-row">
+          <span data-i18n="language">Language</span>
+          <select id="languageInput" autocomplete="off">
+            <option value="en">English</option>
+            <option value="ko">한국어</option>
+          </select>
+        </label>
+
+        <div class="toggle-row option-row">
+          <span>
+            <strong data-i18n="autoStart">Auto start</strong>
+            <small data-i18n="autoStartHelp">The next focus or break session starts automatically.</small>
+          </span>
           <label class="switch">
             <input id="autoStartInput" type="checkbox" />
             <span></span>
           </label>
         </div>
 
-        <div class="toggle-row">
-          <span>Sound</span>
+        <div class="toggle-row option-row">
+          <span>
+            <strong data-i18n="sound">Sound</strong>
+            <small data-i18n="soundHelp">Play an alert sound when a session starts or ends.</small>
+          </span>
           <label class="switch">
             <input id="soundInput" type="checkbox" />
             <span></span>
           </label>
         </div>
 
-        <div class="toggle-row">
-          <span>Vibration</span>
+        <div class="toggle-row option-row">
+          <span>
+            <strong data-i18n="vibration">Vibration</strong>
+            <small data-i18n="vibrationHelp">Vibrate the device when a session ends.</small>
+          </span>
           <label class="switch">
             <input id="vibrationInput" type="checkbox" />
             <span></span>
           </label>
         </div>
 
-        <div class="stats-row" aria-label="Completed focus sessions today">
-          <span>Today</span>
-          <strong id="todayCount">0</strong>
+        <div class="stats-row" aria-label="Completed focus sessions today" data-i18n-aria-label="todayStats">
+          <span data-i18n="todayStats">Completed focus sessions today</span>
+          <strong id="todayCount">0 times</strong>
         </div>
 
-        <section class="asset-store" aria-labelledby="assetStoreTitle">
+        <section class="asset-store is-collapsed" id="assetStore" aria-labelledby="assetStoreTitle">
           <div class="asset-store-header">
             <div>
-              <h3 id="assetStoreTitle">Asset Store</h3>
+              <h3 id="assetStoreTitle" data-i18n="assetStore">Asset Store</h3>
               <p id="assetStoreMessage">Connect to the internet to purchase or restore assets.</p>
             </div>
-            <button class="secondary-button restore-button" id="restorePurchasesButton" type="button">Restore Purchases</button>
+            <button
+              class="plain-icon-button asset-store-toggle"
+              id="assetStoreToggle"
+              type="button"
+              aria-controls="assetStoreContent"
+              aria-expanded="false"
+              aria-label="Open asset store"
+              title="Asset Store"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </button>
           </div>
-          <div class="asset-grid" id="assetGrid" aria-live="polite"></div>
+          <div class="asset-store-content" id="assetStoreContent">
+            <button class="secondary-button restore-button" id="restorePurchasesButton" type="button" data-i18n="restorePurchases">Restore Purchases</button>
+            <div class="asset-grid" id="assetGrid" aria-live="polite"></div>
+          </div>
         </section>
 
         <footer class="panel-actions">
-          <button class="secondary-button" id="clearStatsButton" type="button">Clear</button>
-          <button class="primary-button" id="saveSettingsButton" value="default" type="submit">Save</button>
+          <button class="secondary-button" id="resetSettingsButton" type="button" data-i18n="resetDefaults">Reset</button>
+          <button class="primary-button" id="saveSettingsButton" value="default" type="submit" data-i18n="save">Save</button>
         </footer>
       </form>
     </dialog>
 
-    <script src="./script.js?v=12"></script>
+    <dialog class="confirm-dialog" id="confirmResetDialog" aria-labelledby="confirmResetTitle" aria-describedby="confirmResetDescription">
+      <form class="confirm-panel" method="dialog">
+        <h2 id="confirmResetTitle" data-i18n="resetConfirmTitle">Reset settings to defaults?</h2>
+        <p id="confirmResetDescription" data-i18n="resetConfirmDescription">All timer settings will return to their default values.</p>
+        <div class="confirm-actions">
+          <button class="secondary-button" id="cancelResetButton" value="cancel" type="submit" data-i18n="cancel">Cancel</button>
+          <button class="primary-button" id="confirmResetButton" value="default" type="button" data-i18n="resetDefaults">Reset</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./script.js?v=19"></script>
   </body>
 </html>
