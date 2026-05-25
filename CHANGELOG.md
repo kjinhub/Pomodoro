@@ -1,17 +1,17 @@
-# Changelog
+# 변경 내역
 
 ## 1.1.0
 
-- Added premium replacement image asset store.
-- Added Google Play Billing one-time product integration.
-- Added encrypted local entitlement cache and encrypted premium asset bundles.
-- Added offline-first owned asset display and restore purchase flow.
-- Enabled release code shrinking, resource shrinking, and obfuscation.
+- 프리미엄 교체 이미지 에셋 스토어를 추가했습니다.
+- Google Play Billing 기반 1회성 상품 결제 기능을 추가했습니다.
+- 암호화된 로컬 구매 권한 캐시와 암호화된 프리미엄 에셋 번들을 추가했습니다.
+- 오프라인 우선 방식의 보유 에셋 표시 및 구매 복원 흐름을 추가했습니다.
+- 출시 빌드에서 코드 축소, 리소스 축소, 난독화를 활성화했습니다.
 
 ## 1.0.0
 
-- Initial Play Store-ready offline Android app.
-- Added tomato Pomodoro timer UI and progress mask.
-- Added local settings and stats.
-- Added completion alarm tone and vibration.
-- Added WebView hardening and local-only navigation.
+- Play Store 출시 준비가 완료된 오프라인 Android 앱을 최초로 추가했습니다.
+- 토마토 뽀모도로 타이머 UI와 진행 마스크를 추가했습니다.
+- 로컬 설정 및 통계 기능을 추가했습니다.
+- 완료 알람음과 진동 기능을 추가했습니다.
+- WebView 보안 강화 및 로컬 전용 탐색 제한을 추가했습니다.
