@@ -1,5 +1,6 @@
 const STORAGE_KEY = "tomato-pomodoro-settings";
 const STATS_KEY = "tomato-pomodoro-stats";
+const ASSET_SELECTION_KEY = "tomato-pomodoro-selected-asset";
 const DEFAULT_TOMATO_SRC = "./assets/tomatoto.png";
 
 const PREMIUM_ASSETS = [
@@ -16,6 +17,113 @@ const PREMIUM_ASSETS = [
   ["premium_asset_011", "Eight Ball", "./assets/store/previews/asset_011.webp"],
   ["premium_asset_012", "Baseball", "./assets/store/previews/asset_012.webp"],
 ];
+
+const ASSET_THEMES = {
+  default: {
+    accent: "#ff2630",
+    accentDark: "#d81920",
+    accentLight: "#ff6a4d",
+    accentRgb: "255, 38, 48",
+    success: "#17863a",
+    successDark: "#62c980",
+  },
+  premium_asset_001: {
+    accent: "#8bcf3f",
+    accentDark: "#4f9a23",
+    accentLight: "#d5f66e",
+    accentRgb: "139, 207, 63",
+    success: "#228b52",
+    successDark: "#78d899",
+  },
+  premium_asset_002: {
+    accent: "#4f8fcf",
+    accentDark: "#27649d",
+    accentLight: "#8fc5f2",
+    accentRgb: "79, 143, 207",
+    success: "#2f7f62",
+    successDark: "#72d4aa",
+  },
+  premium_asset_003: {
+    accent: "#ff6b8d",
+    accentDark: "#d84066",
+    accentLight: "#ff9fb6",
+    accentRgb: "255, 107, 141",
+    success: "#3f9b74",
+    successDark: "#7edab2",
+  },
+  premium_asset_004: {
+    accent: "#f26aa8",
+    accentDark: "#c83d7d",
+    accentLight: "#ffb1d0",
+    accentRgb: "242, 106, 168",
+    success: "#4b9b83",
+    successDark: "#85ddc0",
+  },
+  premium_asset_005: {
+    accent: "#f8c537",
+    accentDark: "#d99a10",
+    accentLight: "#ffe27a",
+    accentRgb: "248, 197, 55",
+    success: "#478c42",
+    successDark: "#8fd887",
+  },
+  premium_asset_006: {
+    accent: "#ff8a22",
+    accentDark: "#d65e0d",
+    accentLight: "#ffc15c",
+    accentRgb: "255, 138, 34",
+    success: "#4a9345",
+    successDark: "#8ada82",
+  },
+  premium_asset_007: {
+    accent: "#45bf56",
+    accentDark: "#228a35",
+    accentLight: "#91e878",
+    accentRgb: "69, 191, 86",
+    success: "#2b9652",
+    successDark: "#76d999",
+  },
+  premium_asset_008: {
+    accent: "#ff7a1a",
+    accentDark: "#d8580f",
+    accentLight: "#ffb24f",
+    accentRgb: "255, 122, 26",
+    success: "#55923f",
+    successDark: "#98d57a",
+  },
+  premium_asset_009: {
+    accent: "#2f2f31",
+    accentDark: "#111113",
+    accentLight: "#727276",
+    accentRgb: "47, 47, 49",
+    success: "#5fba7a",
+    successDark: "#8ddca4",
+  },
+  premium_asset_010: {
+    accent: "#2f557f",
+    accentDark: "#172d49",
+    accentLight: "#668db8",
+    accentRgb: "47, 85, 127",
+    success: "#5fba93",
+    successDark: "#8ddcc0",
+  },
+  premium_asset_011: {
+    accent: "#303236",
+    accentDark: "#101114",
+    accentLight: "#777a82",
+    accentRgb: "48, 50, 54",
+    success: "#5cb878",
+    successDark: "#8cdba3",
+  },
+  premium_asset_012: {
+    accent: "#e73d3d",
+    accentDark: "#b51f25",
+    accentLight: "#ffffff",
+    accentRgb: "231, 61, 61",
+    success: "#1f7fb8",
+    successDark: "#76c8ef",
+  },
+};
 
 const DEFAULT_SETTINGS = {
   focus: 25,
@@ -93,6 +201,7 @@ const TRANSLATIONS = {
     openAssetStore: "Open asset store",
     closeAssetStore: "Close asset store",
     restorePurchases: "Restore Purchases",
+    freeAssetsMessage: "All themes are free to use.",
     clear: "Clear",
     resetDefaults: "Reset",
     save: "Save",
@@ -109,6 +218,7 @@ const TRANSLATIONS = {
     cyclesValidation: "Long break cycle must be at least 1 time.",
     owned: "Owned",
     locked: "Locked",
+    free: "Free",
     using: "Using",
     useThisAsset: "Use this asset",
     buyForPrice: "Buy for ₩1,000",
@@ -181,6 +291,7 @@ const TRANSLATIONS = {
     openAssetStore: "에셋 스토어 열기",
     closeAssetStore: "에셋 스토어 닫기",
     restorePurchases: "구매 복원",
+    freeAssetsMessage: "모든 테마를 무료로 사용할 수 있습니다.",
     clear: "초기화",
     resetDefaults: "초기화",
     save: "저장",
@@ -197,6 +308,7 @@ const TRANSLATIONS = {
     cyclesValidation: "긴 휴식 주기는 1회 이상이어야 합니다.",
     owned: "보유",
     locked: "잠김",
+    free: "무료",
     using: "사용 중",
     useThisAsset: "이 에셋 사용",
     buyForPrice: "₩1,000에 구매",
@@ -216,6 +328,7 @@ const MESSAGE_KEYS = {
   "Purchase pending.": "purchasePending",
   "Purchase cancelled.": "purchaseCancelled",
   "Purchase restored.": "purchaseRestored",
+  "All assets are free.": "freeAssetsMessage",
   "에셋을 구매하거나 복원하려면 인터넷에 연결하세요.": "offlineMessage",
   "오프라인에서는 구매할 수 없습니다.": "unableOffline",
   "구매가 완료되었습니다.": "purchaseCompleted",
@@ -469,6 +582,7 @@ function applyTheme() {
   document.documentElement.dataset.theme = theme;
   themeChoice?.classList.toggle("is-dark", theme === "dark");
   themeChoice?.classList.toggle("is-light", theme === "light");
+  applyAssetTheme(assetStoreState.selectedProductId);
 }
 
 function todayKey() {
@@ -504,23 +618,45 @@ function saveStats() {
   }
 }
 
-function createFallbackAssetStoreState(message = t("offlineMessage")) {
+function createFallbackAssetStoreState(message = t("freeAssetsMessage")) {
+  const selectedProductId = loadSelectedAssetId();
   return {
     assets: PREMIUM_ASSETS.map(([productId, name, previewPath]) => ({
       productId,
       name,
       previewPath,
-      price: "₩1,000",
-      owned: false,
-      locked: true,
-      selected: false,
+      price: t("free"),
+      owned: true,
+      locked: false,
+      selected: productId === selectedProductId,
       canBuy: false,
     })),
-    selectedProductId: "",
-    onlineForPurchases: false,
-    offlineLockedMessage: t("offlineMessage"),
+    selectedProductId,
+    onlineForPurchases: true,
+    offlineLockedMessage: "",
     message,
   };
+}
+
+function loadSelectedAssetId() {
+  try {
+    const saved = localStorage.getItem(ASSET_SELECTION_KEY);
+    return PREMIUM_ASSETS.some(([productId]) => productId === saved) ? saved : "";
+  } catch {
+    return "";
+  }
+}
+
+function saveSelectedAssetId(productId) {
+  try {
+    if (productId) {
+      localStorage.setItem(ASSET_SELECTION_KEY, productId);
+    } else {
+      localStorage.removeItem(ASSET_SELECTION_KEY);
+    }
+  } catch {
+    // Keep the in-memory selection if local storage is unavailable.
+  }
 }
 
 function isNativeAssetStoreAvailable() {
@@ -529,7 +665,7 @@ function isNativeAssetStoreAvailable() {
 
 function hydrateAssetStoreFromNative() {
   if (!isNativeAssetStoreAvailable()) {
-    setDefaultTomatoImage();
+    applySelectedAssetFromWebState();
     renderAssetStore();
     return;
   }
@@ -568,29 +704,31 @@ function applyAssetStoreState(nextState) {
           productId: asset.productId,
           name: typeof asset.name === "string" ? asset.name : fallback.name,
           previewPath: typeof asset.previewPath === "string" ? asset.previewPath : fallback.previewPath,
-          price: typeof asset.price === "string" && asset.price ? asset.price : "₩1,000",
-          owned: asset.owned === true,
-          locked: asset.owned !== true,
+          price: t("free"),
+          owned: true,
+          locked: false,
           selected: asset.selected === true,
-          canBuy: asset.canBuy === true,
+          canBuy: false,
         };
       }),
     selectedProductId: typeof nextState.selectedProductId === "string" ? nextState.selectedProductId : "",
-    onlineForPurchases: nextState.onlineForPurchases === true,
-    offlineLockedMessage: t("offlineMessage"),
+    onlineForPurchases: true,
+    offlineLockedMessage: "",
     message: translateMessage(typeof nextState.message === "string" ? nextState.message : ""),
   };
+  saveSelectedAssetId(assetStoreState.selectedProductId);
 }
 
 function setDefaultTomatoImage() {
   tomatoImage.src = tomatoImage.dataset.defaultSrc || DEFAULT_TOMATO_SRC;
   tomatoImage.alt = t("tomatoAlt");
+  applyAssetTheme("");
   drawTomatoProgress();
 }
 
 function applySelectedAssetFromNative() {
   if (!window.TomatoAndroidAssetStore?.getSelectedAssetDataUrl) {
-    setDefaultTomatoImage();
+    applySelectedAssetFromWebState();
     return;
   }
 
@@ -600,6 +738,7 @@ function applySelectedAssetFromNative() {
       tomatoImage.src = dataUrl;
       const selectedAsset = assetStoreState.assets.find((asset) => asset.productId === assetStoreState.selectedProductId);
       tomatoImage.alt = selectedAsset?.name || t("selectedAssetAlt");
+      applyAssetTheme(assetStoreState.selectedProductId);
       drawTomatoProgress();
       return;
     }
@@ -610,16 +749,39 @@ function applySelectedAssetFromNative() {
   setDefaultTomatoImage();
 }
 
+function applySelectedAssetFromWebState() {
+  const selectedAsset = assetStoreState.assets.find((asset) => asset.productId === assetStoreState.selectedProductId);
+  if (!selectedAsset) {
+    setDefaultTomatoImage();
+    return;
+  }
+
+  tomatoImage.src = selectedAsset.previewPath;
+  tomatoImage.alt = selectedAsset.name || t("selectedAssetAlt");
+  applyAssetTheme(selectedAsset.productId);
+  drawTomatoProgress();
+}
+
+function applyAssetTheme(productId) {
+  const theme = ASSET_THEMES[productId] || ASSET_THEMES.default;
+  const root = document.documentElement;
+  root.dataset.assetTheme = productId || "default";
+  root.style.setProperty("--tomato", theme.accent);
+  root.style.setProperty("--tomato-dark", theme.accentDark);
+  root.style.setProperty("--theme-accent-light", theme.accentLight);
+  root.style.setProperty("--theme-accent-rgb", theme.accentRgb);
+  root.style.setProperty("--leaf", root.dataset.theme === "dark" ? theme.successDark : theme.success);
+}
+
 function renderAssetStore() {
   if (!assetGrid || !assetStoreMessage) {
     return;
   }
 
-  const lockedAssets = assetStoreState.assets.some((asset) => !asset.owned);
-  const fallbackMessage = !assetStoreState.onlineForPurchases && lockedAssets
-    ? translateMessage(assetStoreState.offlineLockedMessage)
-    : "";
-  assetStoreMessage.textContent = translateMessage(assetStoreState.message) || fallbackMessage;
+  assetStoreMessage.textContent = translateMessage(assetStoreState.message) || t("freeAssetsMessage");
+  if (restorePurchasesButton) {
+    restorePurchasesButton.hidden = true;
+  }
   assetGrid.replaceChildren(...assetStoreState.assets.map(createAssetCard));
 }
 
@@ -654,15 +816,15 @@ function createAssetCard(asset) {
 
   const meta = document.createElement("p");
   meta.className = "asset-meta";
-  meta.textContent = `${asset.price} · ${asset.owned ? t("owned") : t("locked")}`;
+  meta.textContent = `${t("free")} · ${asset.selected ? t("using") : t("useThisAsset")}`;
 
   const action = document.createElement("button");
   action.type = "button";
-  action.className = asset.owned ? "secondary-button asset-action" : "primary-button asset-action";
+  action.className = asset.selected ? "secondary-button asset-action" : "primary-button asset-action";
   action.dataset.productId = asset.productId;
-  action.dataset.action = asset.owned ? "use" : "buy";
-  action.textContent = asset.owned ? (asset.selected ? t("using") : t("useThisAsset")) : t("buyForPrice");
-  action.disabled = asset.owned ? asset.selected : !asset.canBuy;
+  action.dataset.action = "use";
+  action.textContent = asset.selected ? t("using") : t("useThisAsset");
+  action.disabled = asset.selected;
 
   body.append(title, meta, action);
   card.append(previewWrap, body);
@@ -670,24 +832,12 @@ function createAssetCard(asset) {
 }
 
 function buyAsset(productId) {
-  if (!window.TomatoAndroidAssetStore?.buy) {
-    assetStoreState.message = t("unableOffline");
-    renderAssetStore();
-    return;
-  }
-
-  const asset = assetStoreState.assets.find((item) => item.productId === productId);
-  if (!asset?.canBuy) {
-    assetStoreState.message = t("unableOffline");
-    renderAssetStore();
-    return;
-  }
-
-  window.TomatoAndroidAssetStore.buy(productId);
+  useAsset(productId);
 }
 
 function useAsset(productId) {
   if (!window.TomatoAndroidAssetStore?.selectAsset) {
+    selectAssetInWebState(productId);
     return;
   }
 
@@ -695,10 +845,33 @@ function useAsset(productId) {
     const selected = window.TomatoAndroidAssetStore.selectAsset(productId);
     if (selected) {
       hydrateAssetStoreFromNative();
+    } else {
+      selectAssetInWebState(productId);
     }
   } catch {
-    setDefaultTomatoImage();
+    selectAssetInWebState(productId);
   }
+}
+
+function selectAssetInWebState(productId) {
+  if (!PREMIUM_ASSETS.some(([knownProductId]) => knownProductId === productId)) {
+    return;
+  }
+
+  saveSelectedAssetId(productId);
+  assetStoreState = {
+    ...assetStoreState,
+    selectedProductId: productId,
+    assets: assetStoreState.assets.map((asset) => ({
+      ...asset,
+      owned: true,
+      locked: false,
+      selected: asset.productId === productId,
+      canBuy: false,
+    })),
+  };
+  applySelectedAssetFromWebState();
+  renderAssetStore();
 }
 
 window.AssetStoreNative = {
@@ -1080,11 +1253,10 @@ function showSaveFeedback(message) {
   window.clearTimeout(saveFeedbackTimerId);
   saveFeedbackToast.replaceChildren(checkIcon(), document.createTextNode(message));
   saveFeedbackToast.classList.add("is-visible");
-  showToast(message);
 
   saveFeedbackTimerId = window.setTimeout(() => {
     saveFeedbackToast.classList.remove("is-visible");
-  }, 1500);
+  }, 2000);
 }
 
 function applySettingsForm() {
@@ -1115,7 +1287,7 @@ function applySettingsForm() {
     }
 
     updateUI();
-    showFormMessage(t("settingsSaved"), "success");
+    clearFormMessage();
     setSaveButtonState("complete");
     showSaveFeedback(t("settingsSaved"));
 

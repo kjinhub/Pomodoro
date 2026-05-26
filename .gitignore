@@ -13,3 +13,9 @@ keystore.properties
 assets/ToMaTo.png
 assets/tomato-crop.png
 assets/tomato-cutout.png
+
+# Local-only Android test changes.
+app/src/main/java/com/tomatopomodoro/app/AssetStoreBridge.kt
+app/src/main/java/com/tomatopomodoro/app/AssetVault.kt
+app/src/main/java/com/tomatopomodoro/app/MainActivity.kt
+app/src/main/java/com/tomatopomodoro/app/SecureEntitlementStore.kt
