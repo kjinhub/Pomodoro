@@ -37,6 +37,10 @@ const TRANSLATIONS = {
     resetTimer: "Reset timer",
     settings: "Settings",
     openSettings: "Open settings",
+    menu: "Menu",
+    openMenu: "Open menu",
+    closeMenu: "Close menu",
+    chooseLanguage: "Choose language",
     close: "Close",
     closeSettings: "Close settings",
     progress: "Progress",
@@ -121,6 +125,10 @@ const TRANSLATIONS = {
     resetTimer: "타이머 초기화",
     settings: "설정",
     openSettings: "설정 열기",
+    menu: "메뉴",
+    openMenu: "메뉴 열기",
+    closeMenu: "메뉴 닫기",
+    chooseLanguage: "언어 선택",
     close: "닫기",
     closeSettings: "설정 닫기",
     progress: "진행률",
@@ -224,6 +232,10 @@ const SETTING_LIMITS = {
 };
 
 const SUPPORTED_THEMES = new Set(["dark", "light"]);
+const LANGUAGE_LABELS = {
+  en: "English",
+  ko: "한국어",
+};
 
 const appShell = document.querySelector(".app-shell");
 const timerDisplay = document.getElementById("timerDisplay");
@@ -235,11 +247,18 @@ const tomatoCanvas = document.getElementById("tomatoCanvas");
 const tomatoImage = document.getElementById("tomatoImage");
 const playButton = document.getElementById("playButton");
 const actionLabel = document.getElementById("actionLabel");
+const timerMenu = document.getElementById("timerMenu");
+const menuButton = document.getElementById("menuButton");
 const resetButton = document.getElementById("resetButton");
 const settingsButton = document.getElementById("settingsButton");
 const settingsDialog = document.getElementById("settingsDialog");
 const settingsForm = document.querySelector(".settings-panel");
 const themeChoice = document.querySelector(".theme-choice");
+const languageSelectButton = document.getElementById("languageSelectButton");
+const languageSelectLabel = document.getElementById("languageSelectLabel");
+const languageDialog = document.getElementById("languageDialog");
+const closeLanguageButton = document.getElementById("closeLanguageButton");
+const languageOptions = document.querySelectorAll("[data-language-option]");
 const closeSettingsButton = document.getElementById("closeSettingsButton");
 const saveSettingsButton = document.getElementById("saveSettingsButton");
 const saveFeedbackToast = document.getElementById("saveFeedbackToast");
@@ -423,7 +442,26 @@ function applyLanguage() {
 
   setAssetStoreExpanded(isAssetStoreExpanded);
   renderAssetStore();
+  updateLanguageControl();
   updateUI();
+  updateMenuButtonState();
+}
+
+function updateLanguageControl() {
+  const language = isSupportedLanguage(settings.language) ? settings.language : DEFAULT_SETTINGS.language;
+  if (inputs.language) {
+    inputs.language.value = language;
+  }
+
+  if (languageSelectLabel) {
+    languageSelectLabel.textContent = LANGUAGE_LABELS[language] || language;
+  }
+
+  languageOptions.forEach((option) => {
+    const isSelected = option.dataset.languageOption === language;
+    option.classList.toggle("is-selected", isSelected);
+    option.setAttribute("aria-checked", isSelected.toString());
+  });
 }
 
 function applyTheme() {
@@ -945,6 +983,7 @@ function syncSettingsForm() {
   inputs.long.value = settings.long;
   inputs.cycles.value = settings.cycles;
   inputs.language.value = settings.language;
+  updateLanguageControl();
   inputs.darkTheme.checked = settings.theme === "dark";
   inputs.lightTheme.checked = settings.theme === "light";
   inputs.autoStart.checked = settings.autoStart;
@@ -1107,6 +1146,36 @@ function resetSettingsToDefaults() {
   showToast(t("settingsReset"));
 }
 
+function updateMenuButtonState() {
+  const isOpen = timerMenu?.classList.contains("is-open") || false;
+  menuButton?.setAttribute("aria-expanded", isOpen.toString());
+  menuButton?.setAttribute("aria-label", t(isOpen ? "closeMenu" : "openMenu"));
+}
+
+function setTimerMenuOpen(isOpen) {
+  if (isOpen) {
+    refreshAssetStoreFromNative();
+    renderAssetStore();
+  }
+
+  timerMenu?.classList.toggle("is-open", isOpen);
+  updateMenuButtonState();
+}
+
+function closeTimerMenu() {
+  setTimerMenuOpen(false);
+}
+
+function openSettingsDialog() {
+  syncSettingsForm();
+  refreshAssetStoreFromNative();
+  if (typeof settingsDialog.showModal === "function") {
+    settingsDialog.showModal();
+  } else {
+    settingsDialog.setAttribute("open", "");
+  }
+}
+
 playButton.addEventListener("click", () => {
   if (timerId) {
     pauseTimer();
@@ -1115,16 +1184,77 @@ playButton.addEventListener("click", () => {
   }
 });
 
-resetButton.addEventListener("click", resetTimer);
+menuButton.addEventListener("click", () => {
+  setTimerMenuOpen(!timerMenu.classList.contains("is-open"));
+});
+
+document.addEventListener("pointerdown", (event) => {
+  if (timerMenu?.classList.contains("is-open") && !timerMenu.contains(event.target)) {
+    closeTimerMenu();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeTimerMenu();
+  }
+});
+
+resetButton.addEventListener("click", () => {
+  resetTimer();
+  closeTimerMenu();
+});
 
 settingsButton.addEventListener("click", () => {
-  syncSettingsForm();
-  refreshAssetStoreFromNative();
-  if (typeof settingsDialog.showModal === "function") {
-    settingsDialog.showModal();
-  } else {
-    settingsDialog.setAttribute("open", "");
+  closeTimerMenu();
+  openSettingsDialog();
+});
+
+languageSelectButton.addEventListener("click", () => {
+  updateLanguageControl();
+  try {
+    if (typeof languageDialog.showModal === "function") {
+      languageDialog.showModal();
+      return;
+    }
+  } catch {
+    // Fall back to non-modal display if the host WebView disallows stacked modals.
   }
+
+  if (typeof languageDialog.show === "function") {
+    languageDialog.show();
+  } else {
+    languageDialog.setAttribute("open", "");
+  }
+});
+
+languageDialog.addEventListener("click", (event) => {
+  if (event.target === languageDialog) {
+    if (typeof languageDialog.close === "function") {
+      languageDialog.close();
+    } else {
+      languageDialog.removeAttribute("open");
+    }
+  }
+});
+
+languageOptions.forEach((option) => {
+  option.addEventListener("click", () => {
+    const language = option.dataset.languageOption;
+    if (!isSupportedLanguage(language)) {
+      return;
+    }
+
+    settings = sanitizeSettings({ ...settings, language });
+    saveSettings();
+    applyLanguage();
+
+    if (typeof languageDialog.close === "function") {
+      languageDialog.close();
+    } else {
+      languageDialog.removeAttribute("open");
+    }
+  });
 });
 
 closeSettingsButton.addEventListener("click", () => {

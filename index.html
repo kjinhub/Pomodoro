@@ -9,24 +9,49 @@
     />
     <meta name="referrer" content="no-referrer" />
     <title>Tomato Pomodoro</title>
-    <link rel="stylesheet" href="./styles.css?v=26" />
+    <link rel="stylesheet" href="./styles.css?v=27" />
   </head>
   <body>
     <main class="app-shell" aria-label="Tomato Pomodoro timer" data-i18n-aria-label="appLabel">
       <div class="top-bar">
-        <button class="icon-button" id="resetButton" type="button" aria-label="Reset timer" title="Reset" data-i18n-aria-label="resetTimer" data-i18n-title="reset">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M3 12a9 9 0 1 0 3-6.7" />
-            <path d="M3 3v6h6" />
-          </svg>
-        </button>
+        <div class="timer-menu" id="timerMenu">
+          <button class="icon-button menu-toggle" id="menuButton" type="button" aria-label="Open menu" title="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="timerMenuList" data-i18n-aria-label="openMenu" data-i18n-title="menu">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+          </button>
 
-        <button class="icon-button" id="settingsButton" type="button" aria-label="Open settings" title="Settings" data-i18n-aria-label="openSettings" data-i18n-title="settings">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
-            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.65 8.9a1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.53a1.7 1.7 0 0 0 1-1.56V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1.03 1.56 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.88 1.7 1.7 0 0 0 1.56 1.03H21a2 2 0 1 1 0 4h-.09A1.7 1.7 0 0 0 19.4 15Z" />
-          </svg>
-        </button>
+          <div class="timer-menu-list" id="timerMenuList" aria-labelledby="menuButton">
+            <button class="timer-menu-item" id="resetButton" type="button" data-i18n="reset">Reset</button>
+            <button class="timer-menu-item" id="settingsButton" type="button" data-i18n="settings">Settings</button>
+
+            <section class="asset-store is-collapsed" id="assetStore" aria-labelledby="assetStoreTitle">
+              <div class="asset-store-header">
+                <div>
+                  <h3 id="assetStoreTitle" data-i18n="assetStore">Asset Store</h3>
+                  <p id="assetStoreMessage">Connect to the internet to purchase or restore assets.</p>
+                </div>
+                <button
+                  class="plain-icon-button asset-store-toggle"
+                  id="assetStoreToggle"
+                  type="button"
+                  aria-controls="assetStoreContent"
+                  aria-expanded="false"
+                  aria-label="Open asset store"
+                  title="Asset Store"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+              <div class="asset-store-content" id="assetStoreContent">
+                <button class="secondary-button restore-button" id="restorePurchasesButton" type="button" data-i18n="restorePurchases">Restore Purchases</button>
+                <div class="asset-grid" id="assetGrid" aria-live="polite"></div>
+              </div>
+            </section>
+          </div>
+        </div>
       </div>
 
       <section class="timer-stage" aria-live="polite">
@@ -107,12 +132,18 @@
 
         <p class="form-message" id="formMessage" role="alert" aria-live="assertive"></p>
 
-        <label class="select-row">
+        <label class="select-row language-row">
           <span data-i18n="language">Language</span>
-          <select id="languageInput" autocomplete="off">
+          <select id="languageInput" class="native-language-select" autocomplete="off" tabindex="-1" aria-hidden="true">
             <option value="en">English</option>
             <option value="ko">한국어</option>
           </select>
+          <button class="language-select-button" id="languageSelectButton" type="button" aria-haspopup="dialog" aria-label="Choose language" data-i18n-aria-label="chooseLanguage">
+            <span id="languageSelectLabel">한국어</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
         </label>
 
         <div class="theme-row option-row" role="radiogroup" aria-labelledby="themeTitle">
@@ -192,32 +223,6 @@
           </label>
         </div>
 
-        <section class="asset-store is-collapsed" id="assetStore" aria-labelledby="assetStoreTitle">
-          <div class="asset-store-header">
-            <div>
-              <h3 id="assetStoreTitle" data-i18n="assetStore">Asset Store</h3>
-              <p id="assetStoreMessage">Connect to the internet to purchase or restore assets.</p>
-            </div>
-            <button
-              class="plain-icon-button asset-store-toggle"
-              id="assetStoreToggle"
-              type="button"
-              aria-controls="assetStoreContent"
-              aria-expanded="false"
-              aria-label="Open asset store"
-              title="Asset Store"
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </button>
-          </div>
-          <div class="asset-store-content" id="assetStoreContent">
-            <button class="secondary-button restore-button" id="restorePurchasesButton" type="button" data-i18n="restorePurchases">Restore Purchases</button>
-            <div class="asset-grid" id="assetGrid" aria-live="polite"></div>
-          </div>
-        </section>
-
         <footer class="panel-actions">
           <button class="secondary-button" id="resetSettingsButton" type="button" data-i18n="resetDefaults">Reset</button>
           <button class="primary-button" id="saveSettingsButton" value="default" type="submit" data-i18n="save">Save</button>
@@ -237,8 +242,37 @@
       </form>
     </dialog>
 
+    <dialog class="language-dialog" id="languageDialog" aria-labelledby="languageDialogTitle">
+      <form class="language-sheet" method="dialog">
+        <header class="language-sheet-header">
+          <h2 id="languageDialogTitle" data-i18n="language">Language</h2>
+          <button class="plain-icon-button" id="closeLanguageButton" value="cancel" type="submit" aria-label="Close" title="Close" data-i18n-aria-label="close" data-i18n-title="close">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </header>
+
+        <div class="language-options" role="radiogroup" aria-labelledby="languageDialogTitle">
+          <button class="language-option" type="button" data-language-option="ko" role="radio" aria-checked="false">
+            <span>한국어</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m5 12 4 4L19 6" />
+            </svg>
+          </button>
+          <button class="language-option" type="button" data-language-option="en" role="radio" aria-checked="false">
+            <span>English</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m5 12 4 4L19 6" />
+            </svg>
+          </button>
+        </div>
+      </form>
+    </dialog>
+
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./script.js?v=23"></script>
+    <script src="./script.js?v=25"></script>
   </body>
 </html>
