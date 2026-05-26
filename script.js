@@ -561,7 +561,12 @@ function applyLanguage() {
 }
 
 function updateLanguageControl() {
-  const language = isSupportedLanguage(settings.language) ? settings.language : DEFAULT_SETTINGS.language;
+  const formLanguage = inputs.language?.value;
+  const language = isSupportedLanguage(formLanguage)
+    ? formLanguage
+    : isSupportedLanguage(settings.language)
+      ? settings.language
+      : DEFAULT_SETTINGS.language;
   if (inputs.language) {
     inputs.language.value = language;
   }
@@ -1417,9 +1422,8 @@ languageOptions.forEach((option) => {
       return;
     }
 
-    settings = sanitizeSettings({ ...settings, language });
-    saveSettings();
-    applyLanguage();
+    inputs.language.value = language;
+    updateLanguageControl();
 
     if (typeof languageDialog.close === "function") {
       languageDialog.close();
@@ -1462,9 +1466,7 @@ confirmResetButton.addEventListener("click", () => {
 });
 
 inputs.language.addEventListener("change", () => {
-  settings = sanitizeSettings({ ...settings, language: inputs.language.value });
-  saveSettings();
-  applyLanguage();
+  updateLanguageControl();
 });
 
 [inputs.darkTheme, inputs.lightTheme].forEach((input) => {
@@ -1480,9 +1482,7 @@ inputs.language.addEventListener("change", () => {
 });
 
 inputs.showTodaySummary.addEventListener("change", () => {
-  settings = sanitizeSettings({ ...settings, showTodaySummary: inputs.showTodaySummary.checked });
-  saveSettings();
-  updateUI();
+  clearFormMessage();
 });
 
 restorePurchasesButton.addEventListener("click", () => {
